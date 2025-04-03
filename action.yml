@@ -10,7 +10,7 @@ branding:
 # Define your inputs here.
 inputs:
   token:
-    description: "GITHUB_TOKEN token or a repo scoped PAT"
+    description: 'GITHUB_TOKEN token or a repo scoped PAT'
     required: true
     default: ${{ github.token }}
 

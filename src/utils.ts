@@ -1,4 +1,4 @@
-import { context } from '@actions/github';
+import { context } from '@actions/github'
 
 /**
  * Retrieves the comment that triggered the GitHub Action.
@@ -6,6 +6,5 @@ import { context } from '@actions/github';
  * @returns The comment body as a string.
  */
 export async function getComment(): Promise<string> {
-  return context.payload.comment?.body;
+  return context.payload.comment?.body
 }
-

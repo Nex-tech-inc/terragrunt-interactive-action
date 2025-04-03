@@ -1,9 +1,8 @@
 import * as core from '@actions/core'
-import { isPullRequest, pullRequestDetails, PullRequestDetails } from './prs.js';
-import { getInputs } from './inputs.js';
-import { getEnv } from './env.js';
-import path from 'path';
-
+import { isPullRequest, pullRequestDetails, PullRequestDetails } from './prs.js'
+import { getInputs } from './inputs.js'
+import { getEnv } from './env.js'
+import path from 'path'
 
 /**
  * The main function for the action.
@@ -24,13 +23,11 @@ export async function run(): Promise<void> {
     core.debug(`Working directory: ${workingDirectory}`)
 
     if (!isPullRequest({ inputs })) {
-      throw Error("Comment is not on a pull request");
+      throw Error('Comment is not on a pull request')
     }
 
     const prDetails: PullRequestDetails = await pullRequestDetails({ inputs })
     core.debug(`Pull request details: ${JSON.stringify(prDetails, null, 2)}`)
-
-
 
     core.endGroup()
   } catch (error) {
