@@ -31277,6 +31277,15 @@ const getEnv = async () => {
 };
 
 /**
+ * Retrieves the comment that triggered the GitHub Action.
+ *
+ * @returns The comment body as a string.
+ */
+async function getComment() {
+    return githubExports.context.payload.comment?.body;
+}
+
+/**
  * The main function for the action.
  *
  * @returns Resolves when the action is complete.
@@ -31295,6 +31304,8 @@ async function run() {
         }
         const prDetails = await pullRequestDetails({ inputs });
         coreExports.debug(`Pull request details: ${JSON.stringify(prDetails, null, 2)}`);
+        const comment = await getComment();
+        coreExports.info(comment);
         coreExports.endGroup();
     }
     catch (error) {
