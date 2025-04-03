@@ -6,7 +6,8 @@ on:
 
 permissions:
   contents: read
-
+  issues: write
+  
 jobs:
   test-typescript:
     name: TypeScript Tests
