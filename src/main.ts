@@ -13,7 +13,7 @@ import { getComment } from './utils.js'
 export async function run(): Promise<void> {
   try {
     core.startGroup('Inputs')
-
+    core.info('Getting inputs...')
     const inputs = getInputs()
     core.debug(`Inputs: ${JSON.stringify(inputs, null, 2)}`)
 
@@ -33,7 +33,6 @@ export async function run(): Promise<void> {
     const comment = await getComment()
     core.info(comment)
 
-    core.endGroup()
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
