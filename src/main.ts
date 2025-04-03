@@ -1,5 +1,8 @@
 import * as core from '@actions/core'
-import { wait } from './wait.js'
+import { isPullRequest, pullRequestDetails, PullRequestDetails } from './prs.js'
+import { getInputs } from './inputs.js'
+import { getEnv } from './env.js'
+import path from 'path'
 
 /**
  * The main function for the action.
@@ -8,18 +11,25 @@ import { wait } from './wait.js'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    core.startGroup('Inputs')
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const inputs = getInputs()
+    core.debug(`Inputs: ${JSON.stringify(inputs, null, 2)}`)
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const env = await getEnv()
+    core.debug(`Env: ${JSON.stringify(env, null, 2)}`)
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    const workingDirectory = path.resolve(env.GITHUB_WORKSPACE)
+    core.debug(`Working directory: ${workingDirectory}`)
+
+    if (!isPullRequest({ inputs })) {
+      throw Error('Comment is not on a pull request')
+    }
+
+    const prDetails: PullRequestDetails = await pullRequestDetails({ inputs })
+    core.debug(`Pull request details: ${JSON.stringify(prDetails, null, 2)}`)
+
+    core.endGroup()
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
