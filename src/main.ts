@@ -4,6 +4,7 @@ import { getInputs } from './inputs.js'
 import { getEnv } from './env.js'
 import path from 'path'
 import { getComment } from './utils.js'
+import { checkoutPullRequest } from './checkout.js'
 
 /**
  * The main function for the action.
@@ -13,7 +14,7 @@ import { getComment } from './utils.js'
 export async function run(): Promise<void> {
   try {
     core.startGroup('Inputs')
-
+    core.info('Getting inputs...')
     const inputs = getInputs()
     core.debug(`Inputs: ${JSON.stringify(inputs, null, 2)}`)
 
@@ -30,10 +31,11 @@ export async function run(): Promise<void> {
     const prDetails: PullRequestDetails = await pullRequestDetails({ inputs })
     core.debug(`Pull request details: ${JSON.stringify(prDetails, null, 2)}`)
 
-    const comment = await getComment()
-    core.info(comment)
+    // Checkout the pull request branch
+    await checkoutPullRequest(prDetails)
+    const comment = await getComment({ inputs })
 
-    core.endGroup()
+    core.info(comment.body)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
