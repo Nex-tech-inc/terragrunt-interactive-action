@@ -4,6 +4,7 @@ import { getInputs } from './inputs.js'
 import { getEnv } from './env.js'
 import path from 'path'
 import { getComment } from './utils.js'
+import { checkoutPullRequest } from './checkout.js'
 
 /**
  * The main function for the action.
@@ -30,6 +31,8 @@ export async function run(): Promise<void> {
     const prDetails: PullRequestDetails = await pullRequestDetails({ inputs })
     core.debug(`Pull request details: ${JSON.stringify(prDetails, null, 2)}`)
 
+    // Checkout the pull request branch
+    await checkoutPullRequest(prDetails)
     const comment = await getComment()
     core.info(comment)
 
