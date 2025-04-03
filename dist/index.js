@@ -31281,8 +31281,52 @@ const getEnv = async () => {
  *
  * @returns The comment body as a string.
  */
-async function getComment() {
-    return githubExports.context.payload.comment?.body;
+async function getComment({ inputs }) {
+    const commentId = githubExports.context.payload.comment?.id;
+    if (!commentId) {
+        throw new Error('No comment found in the context payload.');
+    }
+    await addEyesReaction({ inputs, commentId });
+    return {
+        body: githubExports.context.payload.comment?.body,
+        id: commentId
+    };
+}
+/**
+ * Adds a reaction (eyes emoji) to the comment that triggered the GitHub Action.
+ *
+ * @param token - The GitHub token for authentication.
+ */
+async function addEyesReaction({ inputs, commentId }) {
+    const octokit = githubExports.getOctokit(inputs.token);
+    await octokit.rest.reactions.createForIssueComment({
+        owner: githubExports.context.repo.owner,
+        repo: githubExports.context.repo.repo,
+        comment_id: commentId,
+        content: 'eyes' // The emoji reaction to add
+    });
+}
+
+var execExports = requireExec();
+
+/**
+ * Checks out the branch of a pull request using the head_ref.
+ *
+ * @param prDetails - The details of the pull request.
+ */
+async function checkoutPullRequest(prDetails) {
+    const { head_ref } = prDetails;
+    try {
+        // Fetch the branch from the remote
+        await execExports.exec('git', ['fetch', 'origin', head_ref]);
+        // Checkout the branch
+        await execExports.exec('git', ['checkout', head_ref]);
+        coreExports.info(`Checked out branch: ${head_ref}`);
+    }
+    catch (error) {
+        coreExports.error(`Failed to checkout branch ${head_ref}: ${error}`);
+        throw error;
+    }
 }
 
 /**
@@ -31293,6 +31337,7 @@ async function getComment() {
 async function run() {
     try {
         coreExports.startGroup('Inputs');
+        coreExports.info('Getting inputs...');
         const inputs = getInputs();
         coreExports.debug(`Inputs: ${JSON.stringify(inputs, null, 2)}`);
         const env = await getEnv();
@@ -31304,9 +31349,10 @@ async function run() {
         }
         const prDetails = await pullRequestDetails({ inputs });
         coreExports.debug(`Pull request details: ${JSON.stringify(prDetails, null, 2)}`);
-        const comment = await getComment();
-        coreExports.info(comment);
-        coreExports.endGroup();
+        // Checkout the pull request branch
+        await checkoutPullRequest(prDetails);
+        const comment = await getComment({ inputs });
+        coreExports.info(comment.body);
     }
     catch (error) {
         // Fail the workflow run if an error occurs

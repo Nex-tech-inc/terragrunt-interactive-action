@@ -69,5 +69,3 @@ export async function pullRequestDetails({
     head_sha: headRef.target.oid
   }
 }
-
-

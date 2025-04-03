@@ -33,9 +33,9 @@ export async function run(): Promise<void> {
 
     // Checkout the pull request branch
     await checkoutPullRequest(prDetails)
-    const comment = await getComment()
-    core.info(comment)
+    const comment = await getComment({ inputs })
 
+    core.info(comment.body)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
